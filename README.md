@@ -26,6 +26,34 @@ The app specifically loads `logistic_model.pkl` and `tfidf_vectorizer (1).pkl`; 
 
 The notebook uses a Kaggle dataset path. Extract the dataset and adjust that path for local execution. Its training dependencies exceed the small app requirements file; install the packages imported by the notebook in a separate training environment. Preserve the app's label mapping: `0 = negative`, `1 = neutral`, `2 = positive`. The committed runtime manifest omits scikit-learn/joblib dependencies needed by the saved preprocessing or model artifacts; the supplemental install command supplies them.
 
+## UML diagrams
+
+### Main workflow
+
+This is the Streamlit inference path. The two pickle files required at startup are currently missing from the repository.
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant App as Streamlit app.py
+    participant Files as Pickle artifacts
+    participant TFIDF as TF-IDF vectorizer
+    participant Model as Logistic classifier
+    App->>Files: Load logistic_model.pkl and vectorizer
+    alt Required pickle files unavailable
+        Files-->>App: File loading fails
+        Note over App,Files: Current checkout cannot complete startup
+    else Matching artifacts supplied
+        Files-->>App: Loaded vectorizer and classifier
+        User->>App: Enter Arabic text
+        App->>TFIDF: transform text
+        TFIDF-->>App: Feature vector
+        App->>Model: predict features
+        Model-->>App: Numeric class
+        App-->>User: Negative, neutral, or positive label
+    end
+```
+
 ## Getting started
 
 ```bash
